@@ -128,7 +128,7 @@ class Graphite_Ngram:
 
 
    def generate_graph_embedding(self, 
-                                data : Data):
+                                data : Data) -> torch.tensor:
       r"""
       Generate graph-embedding for a single data
       """
@@ -172,13 +172,10 @@ class Graphite_Ngram:
       Fits the N-gram CountVectorizer and utilizes it to generate graph embeddings of the train dataset, then fits the base model.
       """
       
-
       self.nodetype_nodefeats, self.eventname_edgefeats = nodetype_nodefeats, eventname_edgefeats
       self.fit_count_vectorizer( train_dataset )
 
       train_data_dict = dict()
-      
-
       cnt = 1
       for train_data in train_dataset:
          print(f"{cnt} / {len(train_dataset)}: {train_data.name} -- generate graph-embedding", flush = True)
@@ -186,14 +183,9 @@ class Graphite_Ngram:
          train_data_dict[ train_data.name ] = train_data_graph_embedding.tolist()
          cnt+=1
 
-
-      X = pd.DataFrame(train_dataset).T
-      X.columns = self.nodetype_nodefeats + self.eventname_edgefeats 
-      X.reset_index(inplace = True)
-      X.rename(columns = {'index':'data_name'}, inplace = True)
-      X_ = X.drop("data_name", axis = 1)
-      y_ = X['data_name'].apply(lambda x: 1 if "malware" in x.lower() else 0)
-      self.base_model.fit(X = X_, y = y_)
+      X = list( train_data_dict.values() )
+      y = [ 1 if "malware" in data_name else 0 for data_name in train_data_dict.keys() ]
+      self.base_model.fit(X = X, y = y)
       print(f"fitted base-model on train dataset", flush = True)
       return   
 
@@ -205,10 +197,16 @@ class Graphite_Ngram:
    def predict(self, test_data : Data):
       r"""
       Makes a prediction on a single test data
+
+      Args
+         test_data (Data)
+      
+      Returns
+         predicted-label (int) : malware: 1, benign: 0 
+
       """
       # could add assertion that countvecotizer has been fitted 
       test_data_graph_embedding = self.generate_graph_embedding( test_data )
-      return self.base_model.predict( test_data_graph_embedding )
-
+      return self.base_model.predict( [ test_data_graph_embedding.tolist() ] ).item()
 
 

@@ -16,8 +16,11 @@ def main(args):
 
     graphite_ngram.fit( train_dataset = train_dataset,  nodetype_nodefeats = nodetype_nodefeats,  eventname_edgefeats= eventname_edgefeats )
 
+
     for test_data in test_dataset:
-        graphite_ngram.predict( test_data )
+        pred = graphite_ngram.predict( test_data )
+        truth  = [ 1 if "malware" in test_data.name else 0 ]
+        print(f"Predicted: { pred } | True : {truth}", flush=True)
 
     return
 
