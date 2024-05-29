@@ -146,13 +146,13 @@ class Graphite_Ngram:
                                                                                 thread_node_idx = thread_node_idx )
          thread_sorted_event_sequence_for_transform = " ".join(thread_sorted_event_sequence)
          thread_Ngram_count_vector = self.count_vectorizer.transform( [ thread_sorted_event_sequence_for_transform ] ).toarray()
-         thread_Ngram_count_tensor = torch.Tensor( thread_Ngram_count_vector ).view(1,-1) # for Size([1,edge_feat_len])
+         thread_Ngram_count_tensor = torch.Tensor( thread_Ngram_count_vector ).view(1,-1)
 
          # get thread-node-embedding's neighboring node-type component 
          thread_neighboring_nodetypes_tensor = self._get_thread_neighboring_nodetypes( data = data, 
                                                                                        thread_node_idx = thread_node_idx )
 
-         thread_node_embedding = torch.cat( [thread_neighboring_nodetypes_tensor, thread_Ngram_count_tensor], dim = 1) # [ node-type5bit + N>gram events ]
+         thread_node_embedding = torch.cat( [thread_neighboring_nodetypes_tensor, thread_Ngram_count_tensor], dim = 1)
 
          all_thread_node_embeddings = torch.cat( ( all_thread_node_embeddings, thread_node_embedding ) , dim = 0 ) # append
 

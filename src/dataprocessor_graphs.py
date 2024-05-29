@@ -128,7 +128,6 @@ class LoadGraphs:
         # loop through all samples and parse
         for idx, filename in enumerate(dir_contents):
 
-            # sanity check
             if '_Sample_' not in filename and '_SUBGRAPH_' not in filename:
                 continue
             
