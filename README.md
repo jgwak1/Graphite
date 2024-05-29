@@ -1,4 +1,4 @@
-# GRAPHITE: Real-Time Graph-Based Detection of Fileless Malware Attacks
+## GRAPHITE: Real-Time Graph-Based Detection of Fileless Malware Attacks
 
 This repository provides the Python implementation for **Graphite N-gram** and the dataset used in the paper:
 > GRAPHITE: Real-Time Graph-Based Detection of Fileless Malware Attacks
