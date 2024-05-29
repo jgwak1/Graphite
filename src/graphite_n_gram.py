@@ -205,7 +205,6 @@ class Graphite_Ngram:
          predicted-label (int) : malware: 1, benign: 0 
 
       """
-      # could add assertion that countvecotizer has been fitted 
       test_data_graph_embedding = self.generate_graph_embedding( test_data )
       return self.base_model.predict( [ test_data_graph_embedding.tolist() ] ).item()
 
