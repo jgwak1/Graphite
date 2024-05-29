@@ -1,5 +1,5 @@
 # GRAPHITE: Real-Time Graph-Based Detection of Fileless Malware Attacks
-==========================
+
 This repository provides the Python implementation for **Graphite N-gram** and the dataset used in the paper:
 > GRAPHITE: Real-Time Graph-Based Detection of Fileless Malware Attacks
 
@@ -34,7 +34,7 @@ Changing the **N** parameter for N-grams (default: 4)
 $ python src/main.py --N 2
 ```
 
-Changing the **pool** parameter to apply a different pooling method (default: sum).
+Changing the **pool** parameter to apply a different pooling method (default: sum)
 ```sh
 $ python src/main.py --pool mean
 ```
