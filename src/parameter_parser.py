@@ -1,5 +1,5 @@
-import argparse
-import pathlib
+import argparse # python 3.2+
+import pathlib # python 3.4+
 
 def param_parser():
 

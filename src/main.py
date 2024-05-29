@@ -4,6 +4,7 @@ from graphite_n_gram import Graphite_Ngram
 
 import os
 import json
+from sklearn.metrics import accuracy_score, f1_score 
 
 def main(args):
 
@@ -16,11 +17,21 @@ def main(args):
 
     graphite_ngram.fit( train_dataset = train_dataset,  nodetype_nodefeats = nodetype_nodefeats,  eventname_edgefeats= eventname_edgefeats )
 
-
+    preds, truths = [], []
     for test_data in test_dataset:
         pred = graphite_ngram.predict( test_data )
-        truth  = [ 1 if "malware" in test_data.name else 0 ]
-        print(f"Predicted: { pred } | True : {truth}", flush=True)
+        truth  = [ 1 if "malware" in test_data.name else 0 ][0]
+        print(f"Predicted: { pred } | Truth: {truth}   ---   {test_data.name}", flush=True)
+        preds.append(pred)
+        truths.append(truth)
+
+
+    test_acc = accuracy_score(y_true = truths, y_pred = preds)
+    test_f1 = f1_score(y_true = truths, y_pred = preds)
+
+    print("-"*50, flush=True)
+    print(f"Test-Acc: {test_acc} | Test-F1 : {test_f1}", flush=True)
+
 
     return
 

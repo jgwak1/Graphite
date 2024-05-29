@@ -1,6 +1,7 @@
-from typing import List
 import os
 import pickle
+from typing import List # python 3.5+
+
 import torch
 from torch_geometric.data import Data
 

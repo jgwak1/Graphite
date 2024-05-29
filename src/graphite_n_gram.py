@@ -1,10 +1,10 @@
-from typing import List
+from typing import List # python 3.5+
 
 import torch
 from torch_geometric.data import Data
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import RandomForestClassifier
-import pandas as pd # maybe unnecssary
+
 
 class Graphite_Ngram:
    r""" An implementation of Graphite N-gram. 
