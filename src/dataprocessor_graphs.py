@@ -1,147 +1,167 @@
-import os
+from __future__ import annotations
+
 import pickle
-from typing import List # python 3.5+
+from pathlib import Path
+from typing import Iterable, List
 
 import torch
 from torch_geometric.data import Data
 
 
-def load_dataset(benign_data_path : str, 
-                 malware_data_path : str,
-                 dim_node : int,
-                 dim_edge : int ) -> List[Data]:
-    """ 
-    Load both benign and malware graph dataset
+MAX_NODES = 400_000
+MIN_NODES = 10
 
-    Args
-        benign_data_path (str): path to benign data
-        malware_data_path (str): path to malware data 
-        dim_node (int): dimension of node features
-        dim_edge (int): dimension of edge features
 
-    Returns
-        loaded dataset (list): list of benign and malware pytorch-geometric Data samples
-    """
-    dataprocessor = LoadGraphs()
-    benign_dataset = dataprocessor.parse_all_data( benign_data_path , dim_node, dim_edge )
-    malware_dataset = dataprocessor.parse_all_data( malware_data_path, dim_node, dim_edge )
+def load_dataset(
+    benign_data_path: str,
+    malware_data_path: str,
+    dim_node: int,
+    dim_edge: int,
+) -> List[Data]:
+    """Load benign and malware graph samples into a single dataset."""
+
+    loader = GraphDatasetLoader()
+    benign_dataset = loader.parse_all_data(
+        load_path=benign_data_path,
+        num_node_attr=dim_node,
+        num_edge_attr=dim_edge,
+    )
+    malware_dataset = loader.parse_all_data(
+        load_path=malware_data_path,
+        num_node_attr=dim_node,
+        num_edge_attr=dim_edge,
+    )
+
     loaded_dataset = benign_dataset + malware_dataset
-    print(f"+ dataset loaded #Benign = {len(benign_dataset)} | #Malware = {len(malware_dataset)} from\n\t'{benign_data_path}' and\n\t'{malware_data_path}', respectively.", flush=True)
-    
+    print(
+        (
+            f"+ dataset loaded #Benign = {len(benign_dataset)} | "
+            f"#Malware = {len(malware_dataset)} from\n"
+            f"\t'{benign_data_path}' and\n"
+            f"\t'{malware_data_path}', respectively."
+        ),
+        flush=True,
+    )
     return loaded_dataset
 
 
-class LoadGraphs:
+class GraphDatasetLoader:
+    """Load processed graph samples into PyTorch Geometric Data objects."""
 
-    """
-    Data Loader class for the graphs
-    code works for a graph classification task only
-    """
-
-    def __init__(self):
-        return
-
-
-    def load_pickle(self, filename):
-        """
-        loads a pickle
-
-        Args
-           filename (str): path to file
-
-        Returns
-           data : the pickled data in list format
-        """
-        data = None
-        with open(filename, 'rb') as fp:
+    def load_pickle(self, file_path: str | Path):
+        """Load a pickled graph sample."""
+        path = Path(file_path)
+        with path.open("rb") as handle:
             try:
-                data = pickle.load(fp)
-                return data
+                return pickle.load(handle)
             except pickle.UnpicklingError:
                 return None
 
-    def parse_single_graph(self, file_path, num_node_attr=5, num_edge_attr=80):
+    def parse_single_graph(
+        self,
+        file_path: str | Path,
+        num_node_attr: int = 5,
+        num_edge_attr: int = 80,
+    ) -> Data | None:
         """
-        parses a single graph into pytorch-geometric format
-        loads the pre-processed graph data
-
-        Args
-           file_path (str): abs. file path
-
-        Returns:
-           {x, edge_list, y, edge_attr}
+        Parse one processed graph sample into a PyTorch Geometric Data object.
         """
-        _name = file_path.split("/")[-1]
-        data = self.load_pickle(file_path)
+        path = Path(file_path)
+        sample_name = path.name
+        data = self.load_pickle(path)
+
         if data is None:
-            print(">>> pickle.UnpicklingError for sample", _name)
-            return -1, -1, -1, -1, -1
-        
-        x, y, edge_attr, edge_list = data['x'], data['y'], data['edge_attr'], data['edge_list']
-        len_x = len(x)
-        len_edg = len(edge_list[0])
-        # skip extremely large graphs
-        if len(x) > 400000:
-            print(_name, ">>> #nodes:", len(x), " #edges:", len(edge_attr), " | sample skipped!")
-            return -1, -1, -1, -1, -1
+            print(f">>> pickle.UnpicklingError for sample {sample_name}", flush=True)
+            return None
 
-        num_nodes = 10
-        if len(x) < num_nodes:
-            print(_name, ">>> #nodes:", len(x), " #edges:", len(edge_attr), " | sample skipped!")
-            return -1, -1, -1, -1, -1
-        
-        # check for num node attributes
-        for _x in x:
-            if len(_x) != num_node_attr:
-                print(_name, ">>> #node attributes are mismatched, ", len(_x), ' | sample skipped!')
-                return -1, -1, -1, -1, -1
+        x = data["x"]
+        y = data["y"]
+        edge_attr = data["edge_attr"]
+        edge_list = data["edge_list"]
 
-        # check for num edge attributes
-        for _y in edge_attr:
-            if len(_y) != num_edge_attr:
-                print(_name, ">>>> #edge attributes mismatched, ", len(_y), " | sample skipped!")
-                return -1, -1, -1, -1, -1
+        num_nodes = len(x)
+        num_edges = len(edge_list[0]) if edge_list and len(edge_list) > 0 else 0
 
-        # convert all data into tensors
-        x = torch.tensor(x, dtype=torch.float)
-        y = torch.tensor(y, dtype=torch.long)
-        edge_list = torch.tensor(edge_list, dtype=torch.long)
-        edge_attr = torch.tensor(edge_attr, dtype=torch.float)
-        print("> ", _name, "| #node: ", len_x, " #edge: ", len_edg)
+        if num_nodes > MAX_NODES:
+            print(
+                f"{sample_name} >>> #nodes: {num_nodes} #edges: {len(edge_attr)} | sample skipped!",
+                flush=True,
+            )
+            return None
 
-        return x, edge_list, y, edge_attr, _name
+        if num_nodes < MIN_NODES:
+            print(
+                f"{sample_name} >>> #nodes: {num_nodes} #edges: {len(edge_attr)} | sample skipped!",
+                flush=True,
+            )
+            return None
 
+        if not self._has_expected_feature_size(x, num_node_attr):
+            observed = len(x[0]) if x else 0
+            print(
+                f"{sample_name} >>> #node attributes are mismatched, {observed} | sample skipped!",
+                flush=True,
+            )
+            return None
 
-    def parse_all_data(self, load_path, num_node_attr, num_edge_attr ):
-        """
-        Parses all data samples in 'load_path'
+        if not self._has_expected_feature_size(edge_attr, num_edge_attr):
+            observed = len(edge_attr[0]) if edge_attr else 0
+            print(
+                f"{sample_name} >>> #edge attributes are mismatched, {observed} | sample skipped!",
+                flush=True,
+            )
+            return None
 
-        Args
-           load_path (str): the path to load all pickled samples
+        graph = Data(
+            x=torch.tensor(x, dtype=torch.float),
+            edge_index=torch.tensor(edge_list, dtype=torch.long),
+            edge_attr=torch.tensor(edge_attr, dtype=torch.float),
+            y=torch.tensor(y, dtype=torch.long),
+            name=sample_name,
+        )
 
-        Returns
-           dataset (list): list of pytorch-geometric Data samples
-        """
-        dir_contents = os.listdir(load_path)
-        
-        dataset = []  # will store the datset here
-        # loop through all samples and parse
-        for idx, filename in enumerate(dir_contents):
+        print(f"> {sample_name} | #node: {num_nodes} #edge: {num_edges}", flush=True)
+        return graph
 
-            if '_Sample_' not in filename and '_SUBGRAPH_' not in filename:
+    def parse_all_data(
+        self,
+        load_path: str | Path,
+        num_node_attr: int,
+        num_edge_attr: int,
+    ) -> List[Data]:
+        """Parse all valid graph samples in a directory."""
+        path = Path(load_path)
+        dataset: List[Data] = []
+
+        for file_path in sorted(path.iterdir()):
+            if not file_path.is_file():
                 continue
-            
-            _path = load_path + "/" + filename  # path to the pickled file
-            
-            x, edge_list, y, edge_attr, name = self.parse_single_graph(_path, 
-                                                                        num_node_attr=num_node_attr, 
-                                                                        num_edge_attr=num_edge_attr)
 
-            if isinstance(x, int) and x == -1:
+            if not self._is_supported_sample(file_path.name):
                 continue
-            dataset.append( Data(x=x, edge_index=edge_list, edge_attr=edge_attr, y=y, name=name) )
 
-
+            graph = self.parse_single_graph(
+                file_path=file_path,
+                num_node_attr=num_node_attr,
+                num_edge_attr=num_edge_attr,
+            )
+            if graph is not None:
+                dataset.append(graph)
 
         return dataset
 
+    @staticmethod
+    def _is_supported_sample(filename: str) -> bool:
+        """Return True if the filename matches the expected processed-sample pattern."""
+        return "_Sample_" in filename or "_SUBGRAPH_" in filename
+
+    @staticmethod
+    def _has_expected_feature_size(
+        feature_rows: Iterable[Iterable[float]],
+        expected_size: int,
+    ) -> bool:
+        """Return True if every feature row has the expected width."""
+        for row in feature_rows:
+            if len(row) != expected_size:
+                return False
+        return True

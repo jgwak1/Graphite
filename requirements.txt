@@ -1,4 +1,10 @@
-# Necessary requirements
+# Graphite public artifact requirements
+
+elasticsearch>=7,<8
+igraph>=0.10,<0.12
+networkx>=2.8,<4
+numpy>=1.23
+python-dateutil>=2.8
+scikit-learn>=1.1,<1.4
 torch==1.13.0
 torch-geometric==2.3.1
-scikit-learn==1.1.1

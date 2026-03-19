@@ -1,41 +1,119 @@
-## GRAPHITE: Real-Time Graph-Based Detection of Fileless Malware Attacks
+# Graphite: Real-Time Graph-Based Detection of Fileless Malware Attacks
 
-This repository provides the Python implementation for **Graphite N-gram** and the dataset used in the paper:
-> GRAPHITE: Real-Time Graph-Based Detection of Fileless Malware Attacks
+Graphite is a graph-based malware-detection workflow built on Event Tracing for Windows (ETW) logs.
 
----------------------
+This repository is a public-facing artifact of the broader Graphite pipeline. It includes the original Graphite N-gram modeling code together with cleaned upstream ETW-to-graph processing stages that show the larger system behind the method.
 
-### Abstract
+Graphite transforms ETW telemetry into computation graphs, projects smaller graphlets from those graphs, and performs malware detection using thread-centered graph-based features.
 
-<p align="justify">
-Advanced malware attacks often
-employed sophisticated tactics such as DLL injection, script-based attacks, and the exploitation of zero-day vulnerabilities. As evidenced by the recent high-profile cyberattacks, these techniques have enabled attackers to infiltrate computer systems that were thought to be well-protected.
-There is thus an urgent need to enhance current malware defenses with advanced Artificial Intelligence(AI) techniques that can effectively detect in real-time the elusive traces of malware attacks concealed within the extensive realm of normal
-activities. This paper introduces Graphite, a graph-based approach for real-time detection of advanced malware attacks based on the event data collected from Event Tracing for Windows (ETW). Graphite first abstracts various entities and their relationships embodied within system events into computation graphs, which are amenable to graph-based machine learning methods. As a computation graph can be gigantic, making real-time malware detection inefficient, we project the graph into smaller graphlets, which are then subsequently fed into our graph-based approach to detect malicious activities. Our experimental results show that Graphite achieves 87.7% classification accuracy in offline testing and 86.7% accuracy in real-time detection.</p>
+![Graphite architecture](docs/figures/graphite_architecture_readme.png)
 
+## Related paper
 
+This repository is based on the following paper:
 
-### Requirements
-The codebase is implemented in Python 3.9.19. Necessary package versions for running the code are as below.
+**Graphite: Real-Time Graph-Based Detection of Fileless Malware Attacks**  
+SecureComm 2024, LNICST 629, Springer, 2026.  
+DOI: `10.1007/978-3-031-94455-0_8`
+
+## What is in this repository
+
+This repository contains four main parts:
+
+- `src/`: the original Graphite N-gram modeling and evaluation code
+- `pipeline/`: cleaned ETW-to-graph processing stages
+- `infra/logstash/`: a sanitized example of the ingestion layer used before graph construction
+- `dataset/`: train/test data used by the current modeling path
+
+The `pipeline/` directory is included to show the broader workflow behind Graphite rather than only the final classifier.
+
+## Repository structure
+
+```text
+.
+├── src/
+│   ├── main.py
+│   ├── graphite_n_gram.py
+│   ├── dataprocessor_graphs.py
+│   └── parameter_parser.py
+├── dataset/
+│   ├── train/
+│   └── test/
+├── pipeline/
+│   ├── step1_etl/
+│   │   └── README.md
+│   ├── step2_graph_generation/
+│   │   ├── run_step2_pipeline.py
+│   │   ├── build_computation_graph.py
+│   │   ├── normalize_edge_directions.py
+│   │   ├── encode_graph_attributes.py
+│   │   ├── project_graphlets.py
+│   │   ├── README.md
+│   │   └── resources/
+│   └── step3_processing_split/
+│       └── README.md
+├── infra/
+│   └── logstash/
+│       ├── logstash_pipeline_example.conf
+│       └── README.md
+├── docs/
+│   └── figures/
+│       ├── graphite_architecture_readme.png
+│       └── graphite_projection_readme.png
+├── requirements.txt
+└── README.md
 ```
-torch==1.13.0
-torch-geometric==2.3.1
-scikit-learn==1.1.1
+
+## Pipeline overview
+
+At a high level, Graphite follows this workflow:
+
+1. parse and normalize ETW event records
+2. build a computation graph over system entities and event relationships
+3. project smaller graphlets from large graphs
+4. convert graph artifacts into model-ready samples
+5. train and evaluate Graphite N-gram models
+
+The most important public pipeline stage in this repository is `pipeline/step2_graph_generation/`, which contains the graph construction and graphlet projection logic.
+
+![Graph projection example](docs/figures/graphite_projection_readme.png)
+
+## Quick start
+
+The simplest runnable path in this repository is the original Graphite N-gram modeling code under `src/`.
+
+Train and test using the data under `dataset/train` and `dataset/test`:
+
+```bash
+python3 src/main.py
 ```
 
-### Running the code
-Training and testing the **Graphite N-gram** based on the dataset provided in dataset/train and dataset/test. 
-```sh
-$ python3 src/main.py
+Change the N-gram size:
+
+```bash
+python3 src/main.py --N 2
 ```
 
-Changing the **N** parameter for N-grams (default: 4)
-```sh
-$ python src/main.py --N 2
+Change the pooling method:
+
+```bash
+python3 src/main.py --pool mean
 ```
 
-Changing the **pool** parameter to apply a different pooling method (default: sum)
-```sh
-$ python src/main.py --pool mean
-```
+## Notes on scope
 
+This repository is intended as a clean public research artifact and engineering snapshot.
+
+Included:
+- Graphite N-gram modeling code
+- cleaned ETW-to-graph pipeline stages
+- sanitized ingestion example
+- representative documentation figures
+
+Not included:
+- full production deployment setup
+- full raw ETW datasets
+- all historical experiment outputs
+- internal environment-specific configuration
+
+For step-specific details, see the README files under `pipeline/` and `infra/logstash/`.
