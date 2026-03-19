@@ -8,14 +8,6 @@ Graphite transforms ETW telemetry into computation graphs, projects smaller grap
 
 ![Graphite architecture](docs/figures/graphite_architecture_readme.png)
 
-## Related paper
-
-This repository is based on the following paper:
-
-**Graphite: Real-Time Graph-Based Detection of Fileless Malware Attacks**  
-SecureComm 2024, LNICST 629, Springer, 2026.  
-DOI: `10.1007/978-3-031-94455-0_8`
-
 ## What is in this repository
 
 This repository contains four main parts:
@@ -122,3 +114,26 @@ Included:
 Some raw datasets and environment-specific configuration are intentionally omitted from the public release.
 
 For step-specific details, see the README files under `src/`, `pipeline/`, and `infra/logstash/`.
+
+
+## How to Cite
+
+If you use this code or dataset in your research, please cite our paper:
+
+**Graphite: Real-Time Graph-Based Detection of Fileless Malware Attacks**<br>
+Priti Wakodikar<sup>*</sup>, Joon-Young Gwak J<sup>*</sup>, Meng Wang, Guanhua Yan, Xiaokui Shu, Scott Stoller, Ping Yang<br>
+*( <sup>*</sup> **Co-first authors** )*<br>
+SecureComm 2024, LNICST 629, Springer, 2026.<br>
+DOI: `10.1007/978-3-031-94455-0_8`
+
+```bibtex
+@inproceedings{wakodikar2024graphite,
+  title={Graphite: Real-Time Graph-Based Detection of Windows Fileless Malware Attacks},
+  author={Wakodikar, Priti and Gwak, Joon-Young and Wang, Meng and Yan, Guanhua and Shu, Xiaokui and Stoller, Scott and Yang, Ping},
+  booktitle={SecureComm 2024},
+  series={LNICST},
+  volume={629},
+  year={2026},
+  publisher={Springer},
+  doi={10.1007/978-3-031-94455-0_8}
+}
