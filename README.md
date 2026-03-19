@@ -35,12 +35,17 @@ The `pipeline/` directory is included to show the broader workflow behind Graphi
 │   ├── main.py
 │   ├── graphite_n_gram.py
 │   ├── dataprocessor_graphs.py
-│   └── parameter_parser.py
+│   ├── parameter_parser.py
+│   └── README.md
 ├── dataset/
 │   ├── train/
 │   └── test/
 ├── pipeline/
 │   ├── step1_etl/
+│   │   ├── format_elasticsearch_logs.py
+│   │   ├── flatten_event_record.py
+│   │   ├── field_selection.py
+│   │   ├── text_event_parser.py
 │   │   └── README.md
 │   ├── step2_graph_generation/
 │   │   ├── run_step2_pipeline.py
@@ -51,6 +56,9 @@ The `pipeline/` directory is included to show the broader workflow behind Graphi
 │   │   ├── README.md
 │   │   └── resources/
 │   └── step3_processing_split/
+│       ├── run_step3_pipeline.py
+│       ├── process_graph_data.py
+│       ├── split_dataset.py
 │       └── README.md
 ├── infra/
 │   └── logstash/
@@ -59,7 +67,8 @@ The `pipeline/` directory is included to show the broader workflow behind Graphi
 ├── docs/
 │   └── figures/
 │       ├── graphite_architecture_readme.png
-│       └── graphite_projection_readme.png
+│       ├── graphite_projection_readme.png
+│       └── graphite_thread_embedding_readme.png
 ├── requirements.txt
 └── README.md
 ```
@@ -110,10 +119,6 @@ Included:
 - sanitized ingestion example
 - representative documentation figures
 
-Not included:
-- full production deployment setup
-- full raw ETW datasets
-- all historical experiment outputs
-- internal environment-specific configuration
+Some raw datasets and environment-specific configuration are intentionally omitted from the public release.
 
-For step-specific details, see the README files under `pipeline/` and `infra/logstash/`.
+For step-specific details, see the README files under `src/`, `pipeline/`, and `infra/logstash/`.
