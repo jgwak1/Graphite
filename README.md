@@ -120,9 +120,12 @@ For step-specific details, see the README files under `src/`, `pipeline/`, and `
 
 If you use this code or dataset in your research, please cite our paper:
 
-**Graphite: Real-Time Graph-Based Detection of Fileless Malware Attacks** Priti Wakodikar\*, Joon-Young Gwak\*, Meng Wang, Guanhua Yan, Xiaokui Shu, Scott Stoller, Ping Yang  
-*(\* Co-first authors / Equal contribution)* SecureComm 2024, LNICST 629, Springer, 2026.  
-DOI: `10.1007/978-3-031-94455-0_8`
+**Graphite: Real-Time Graph-Based Detection of Windows Fileless Malware Attacks**  
+Priti Wakodikar*, Joon-Young Gwak*, Meng Wang, Guanhua Yan, Xiaokui Shu, Scott Stoller, Ping Yang  
+* Equal contribution
+
+SecureComm 2024, LNICST 629, Springer, 2026  
+DOI: [10.1007/978-3-031-94455-0_8](https://doi.org/10.1007/978-3-031-94455-0_8)
 
 ```bibtex
 @inproceedings{wakodikar2024graphite,
